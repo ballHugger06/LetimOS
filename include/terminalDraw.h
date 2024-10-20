@@ -65,7 +65,38 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 
 //puts c at the cursor position
 s32 terminalPutC(terminalStuff* stuff, char c) {
-	
+	u32 i;
+	u32 j = 0;
+	u8 k;
+	u8* pixel = stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( stuff->cursor_row - 1 ) ) - 1 ) * stuff->scanline ) + ( ( stuff->cursor_row - 1 ) * ( stuff->glyph_width + 1) * 4 );
+
+	for (i = 0; i < stuff->glyph_height; i++) {
+		for (k = 0; ; k++) {
+			if ((j * 8) + k == stuff->glyph_width) {
+				break;
+			}
+			
+			if ((stuff->glyph_list[j] << k) >= 0b10000000) {
+				*(u32*)(pixel + (j * 8) + k) = 0x00FFFFFF;
+			}
+			
+			if (k == 7) {
+				k = 0;
+				j += 1;
+				continue;
+			}
+		}
+
+		pixel += stuff->scanline
+	}
+	return 1;
 }
 
+terminalPutS(terminalStuff* stuff, char* s) {
+	u64 i = 0;
+	while (s[i] != 0) {
+		terminalPutC(stuff, s[i]);
+	}
+	return 1;
+}
 #endif
