@@ -15,8 +15,6 @@ extern char environment[4096];
 #ifndef _TERMINALWRITE_
 #define _TERMINALWRITE_
 
-#define CHARACTER_SPACE 1
-
 typedef struct {
 	u8* fb;
 	glyphListA glyph_list;
