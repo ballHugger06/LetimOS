@@ -24,8 +24,8 @@ typedef struct {
 } tarHeader;
 
 //input is tarHeader.size
-u32 tarGetFileSize(char *in) {
-    u32 size = 0;
+u64 tarGetFileSize(char *in) {
+    u64 size = 0;
     u32 j;
     u32 count = 1;
 
