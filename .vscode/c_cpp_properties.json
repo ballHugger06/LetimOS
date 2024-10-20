@@ -12,10 +12,9 @@
             "intelliSenseMode": "linux-gcc-x64"
         },
         {
-            "name": "Myos",
+            "name": "LetimOS",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/home/eren/Desktop/Allahuakbar2/test/include/**"
+                "${workspaceFolder}/include/**"
             ],
             "defines": [],
             "compilerPath": "/home/eren/opt/cross/bin/x86_64-elf-gcc",
