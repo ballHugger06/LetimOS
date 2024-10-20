@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "typedefs.h": "c"
+    },
+    "makefile.configureOnOpen": false
+}

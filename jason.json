@@ -1,0 +1,8 @@
+{
+    "align": 1024,
+    "config": "config.txt",
+    "initrd": {"type": "tar", "gzip": false, "directory":"initdir"},
+    "partitions": [
+        {"type": "boot","size": 100, "name": "EFI System"}
+    ]
+}
