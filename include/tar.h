@@ -60,7 +60,9 @@ tarHeader* tarGetNextHeaderBBSafe(tarHeader* address) {
 
 //returns the pointer to the file with the filename "path"
 //if it isnt found, returns 0
-tarHeader* tarFindFileByPathBBSafe(tarHeader* start, char* path) {
+tarHeader* tarFindFileByPathBBSafe(char* path) {
+    tarHeader* start = (tarHeader*)bootboot.initrd_ptr;
+
     while (1) {
         if (strsame(start->filename, path)) {
             return start;
