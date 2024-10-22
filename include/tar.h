@@ -76,7 +76,7 @@ tarHeader* tarFindFileByPathBBSafe(char* path) {
 
 //dont input wrong addresses
 char* tarGetFileStart(tarHeader* header) {
-    return header + 512;
+    return (char*)((char*)header + 512);
 }
 
 #endif
