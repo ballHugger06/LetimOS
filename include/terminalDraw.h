@@ -2,7 +2,7 @@
 #include <bootboot.h>
 #include <PSF.h>
 #include <memoryFunctions.h>
-
+#include <ustar.h>
 
 #ifndef _BOOTBOOT_
 #define _BOOTBOOT_
@@ -37,7 +37,11 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->width = bootboot.fb_width;
 	stuff->scanline = bootboot.fb_scanline;
 
+<<<<<<< HEAD
 	ptr file = tarFindFileByPathBBSafe("fonts/font.psf");
+=======
+	ptr file = ustarFindFileByPathBBSafe("font/font.psf");
+>>>>>>> e43b2cf45b3fc5c26745bc77e02525d6feea14f9
 	if (file == 0) {
 		while (1) {
 			for (u32 i = 0; i < bootboot.fb_height; i++) {
@@ -47,9 +51,9 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 		return 0;
 	}
 
-	u64 size = tarGetFileSize(((tarHeader*)file)->size);
+	u64 size = ustarGetFileSize(((tarHeader*)file)->size);
 
-	file = tarGetFileStart(file);
+	file = ustarGetFileStart(file);
 
 	stuff->glyph_height = ((psf2Header*)file)->height;
 	stuff->glyph_width = ((psf2Header*)file)->width;
@@ -71,12 +75,54 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	return 1;
 }
 
-//puts c at the cursor position
+//scrolls the terminal once
+//doesnt zero out the bottom of the rows
+s32 terminalScroll(terminalStuff* stuff) {
+	u8 swap[stuff->width * 4];
+	u8 swap1[stuff->width * 4];
+
+	memcpy(swap, ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+	memcpy(( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+
+	u32 i = ((stuff->row) * (stuff->glyph_height + 1) - 2);
+	if (i % 2 == 0) {
+		do {
+			if (i % 2 == 0) {
+				memcpy(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
+			}
+			else {
+				memcpy(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
+			}
+
+			i--;
+		} while (i != 0);
+	}
+	else {
+		do {
+			if (i % 2 == 0) {
+				memcpy(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
+			}
+			else {
+				memcpy(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
+			}
+
+			i--;
+		} while (i != 0);
+	}
+
+	return 1;
+}
+
+//puts c at the cursor position and increments the position
 s32 terminalPutC(terminalStuff* stuff, char c) {
 	u32 i;
 	u32 j = 0;
 	u8 k;
-	u8* pixel = stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( stuff->cursor_row - 1 ) ) - 1 ) * stuff->scanline ) + ( ( stuff->cursor_row - 1 ) * ( stuff->glyph_width + 1) * 4 );
+	u8* pixel = stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( stuff->cursor_row - 1 ) ) - 1 ) * stuff->scanline ) + ( ( stuff->cursor_column - 1 ) * ( stuff->glyph_width + 1) * 4 );
 
 	for (i = 0; i < stuff->glyph_height; i++) {
 		for (k = 0; ; k++) {
@@ -96,6 +142,17 @@ s32 terminalPutC(terminalStuff* stuff, char c) {
 		}
 
 		pixel += stuff->scanline;
+	}
+	
+	stuff->cursor_column += 1;
+	if (stuff->cursor_column > stuff->column) {
+		stuff->cursor_column = 1;
+		stuff->cursor_row +=1;
+
+		if (stuff->cursor_row > stuff->row) {
+			terminalScroll(stuff);
+			stuff->cursor_row = stuff->row;
+		}
 	}
 	return 1;
 }
