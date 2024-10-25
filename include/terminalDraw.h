@@ -37,11 +37,7 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->width = bootboot.fb_width;
 	stuff->scanline = bootboot.fb_scanline;
 
-<<<<<<< HEAD
-	ptr file = tarFindFileByPathBBSafe("fonts/font.psf");
-=======
-	ptr file = ustarFindFileByPathBBSafe("font/font.psf");
->>>>>>> e43b2cf45b3fc5c26745bc77e02525d6feea14f9
+	ptr file = ustarFindFileByPathBBSafe("fonts/font.psf");
 	if (file == 0) {
 		while (1) {
 			for (u32 i = 0; i < bootboot.fb_height; i++) {
@@ -51,7 +47,7 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 		return 0;
 	}
 
-	u64 size = ustarGetFileSize(((tarHeader*)file)->size);
+	u64 size = ustarGetFileSize(((ustarHeader*)file));
 
 	file = ustarGetFileStart(file);
 
@@ -81,19 +77,19 @@ s32 terminalScroll(terminalStuff* stuff) {
 	u8 swap[stuff->width * 4];
 	u8 swap1[stuff->width * 4];
 
-	memcpy(swap, ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-	memcpy(( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+	memcpy_big(swap, ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+	memcpy_big(( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
 
 	u32 i = ((stuff->row) * (stuff->glyph_height + 1) - 2);
 	if (i % 2 == 0) {
 		do {
 			if (i % 2 == 0) {
-				memcpy(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
+				memcpy_big(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
 			}
 			else {
-				memcpy(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
+				memcpy_big(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
 			}
 
 			i--;
@@ -102,12 +98,12 @@ s32 terminalScroll(terminalStuff* stuff) {
 	else {
 		do {
 			if (i % 2 == 0) {
-				memcpy(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
+				memcpy_big(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
 			}
 			else {
-				memcpy(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
+				memcpy_big(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
 			}
 
 			i--;

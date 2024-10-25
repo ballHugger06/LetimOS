@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #include <typedefs.h>
 #include <bootboot.h>
 
@@ -35,25 +34,21 @@ u64 ustarGetFileSize(ustarHeader* file) {
 	return size;
 }
 
-ustarHeader* ustarFindFileByPathBBSafe() {
-	
+u8* ustarGetFileStart(ustarHeader* start) {
+	return (((u8*)start) + 512);
 }
-
-
-#endif
-=======
 
 ustarHeader* ustarGetNextHeaderBBSafe(ustarHeader* start) {
 	u64 size = ustarGetFileSize(start);
-	ustarHeader* ptr = ((u8*)start + ((((size + 511) / 512) + 1) * 512));
-	if (ptr >= bootboot.initrd_ptr + bootboot.initrd_size) {
+	ustarHeader* ptr = (ustarHeader*)((u8*)start + ((((size + 511) / 512) + 1) * 512));
+	if ((u64)ptr >= bootboot.initrd_ptr + bootboot.initrd_size) {
 		return 0;
 	}
 	return ptr;
 }
 
 ustarHeader* ustarFindFileByPathBBSafe(char* path) {
-	ustarHeader* ptr = bootboot.initrd_ptr;
+	ustarHeader* ptr = (ustarHeader*)bootboot.initrd_ptr;
 
 	while(1) {
 		ptr = ustarGetNextHeaderBBSafe(ptr);
@@ -64,6 +59,17 @@ ustarHeader* ustarFindFileByPathBBSafe(char* path) {
 		if (strsame(path, ptr->filename)) {
 			return ptr;
 		}
+
+
+		for (u32 i = 0; i < bootboot.fb_height; i++) {
+		    *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 200 * 4 )) = 0x000FFFF0;
+		}
+		
 	}
 }
->>>>>>> e43b2cf45b3fc5c26745bc77e02525d6feea14f9
+
+#endif
+
+
+
+
