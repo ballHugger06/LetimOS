@@ -9,8 +9,8 @@ extern u8 fb;
 extern char environment[4096];
 #endif
 
-#ifndef _TAR_
-#define _TAR_
+#ifndef _TAR_H_
+#define _TAR_H_
 
 typedef struct {
     char filename[100];
