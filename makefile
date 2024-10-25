@@ -5,6 +5,7 @@ first_time:
 	mkdir initdir/kernel
 	mkdir initdir/fonts
 	cp font.psf initdir/fonts
+	cp font.psf initdir
 
 kernel.elf: kernel.c
 	x86_64-elf-gcc -Wall -fpic -ffreestanding -fno-stack-protector -nostdinc -nostdlib -Iinclude -mno-red-zone -c kernel.c -o kernel.o

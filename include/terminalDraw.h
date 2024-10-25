@@ -37,7 +37,7 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->width = bootboot.fb_width;
 	stuff->scanline = bootboot.fb_scanline;
 
-	ptr file = ustarFindFileByPathBBSafe("fonts/font.psf");
+	ptr file = ustarFindFileByPathBBSafe("font.psf");
 	if (file == 0) {
 		while (1) {
 			for (u32 i = 0; i < bootboot.fb_height; i++) {
