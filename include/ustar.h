@@ -22,16 +22,16 @@ typedef struct {
 	char filenameprefix[155];
 } ustarHeader;
 
-u64 ustarGetFileSize(ustarHeader* file) {
-	u8 i = 11;
-	u8 j = 1;
-	u64 size = 0;
-	do {
-		size += j * (file->filesize[i] - '0');
-		i--;
-		j *= 8;
-	} while (i != 0);
-	return size;
+u64 ustarGetFileSize(ustarHeader* header) {
+    u64 size = 0;
+    u32 j;
+    u32 count = 1;
+
+    for (j = 11; j > 0; j--, count *= 8) {
+        size += ((header->filesize[j - 1] - '0') * count);
+    }
+
+    return size;
 }
 
 u8* ustarGetFileStart(ustarHeader* start) {

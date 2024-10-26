@@ -37,7 +37,7 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->width = bootboot.fb_width;
 	stuff->scanline = bootboot.fb_scanline;
 
-	ptr file = ustarFindFileByPathBBSafe("font.psf");
+	ptr file = ustarFindFileByPathBBSafe("fonts/font.psf");
 	if (file == 0) {
 		while (1) {
 			for (u32 i = 0; i < bootboot.fb_height; i++) {
@@ -56,8 +56,8 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 
 	stuff->row = (stuff->height / (stuff->glyph_height + 1));
 	stuff->column = (stuff->width / (stuff->glyph_width + 1));
-	stuff->cursor_column = 0;
-	stuff->cursor_row = 0;
+	stuff->cursor_column = 1;
+	stuff->cursor_row = 1;
 	
 	if (!psf2FillGlyphListA(file, size, &(stuff->glyph_list))) {
 		while (1) {
@@ -66,6 +66,10 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 			}
 		}
 		return 0;
+	}
+
+	for (u32 i = 0; i < bootboot.fb_height; i++) {
+	    *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 200 * 4 )) = 0x00FF00FF;
 	}
 
 	return 1;

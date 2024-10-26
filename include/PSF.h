@@ -72,7 +72,7 @@ u8* psf2GetGlyphASafe(psf2Header* file_start, u64 file_size, char c) {
 	u32 i = 0;
 	u32 glyph_counter = 0;
 	do {
-		if (table + i >= file_size) {
+		if (table + i >= file_start + file_size) {
 			return 0;
 		}
 

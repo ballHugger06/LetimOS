@@ -18,4 +18,12 @@ void _start(void) {
             }
         }
     }
+
+    for (u32 i = 0; i < bootboot.fb_width; i++) {
+        *(u32*)(&fb + ( ( ( 100 ) - 1 ) * bootboot.fb_scanline ) + ( i * 4 )) = 0x00FF0000;
+    }
+
+    while (1) {
+        terminalPutS(&stuff,"Salam Dunya");
+    }
 }
