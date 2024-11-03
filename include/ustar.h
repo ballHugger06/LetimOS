@@ -59,11 +59,6 @@ ustarHeader* ustarFindFileByPathBBSafe(char* path) {
 		if (strsame(path, ptr->filename)) {
 			return ptr;
 		}
-
-
-		for (u32 i = 0; i < bootboot.fb_height; i++) {
-		    *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 200 * 4 )) = 0x000FFFF0;
-		}
 		
 	}
 }

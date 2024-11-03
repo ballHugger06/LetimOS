@@ -25,4 +25,5 @@ clean: initdir/kernel/kernel.elf kernel.elf ledisk.img
 	rm kernel.elf
 	rm kernel.o
 	rm initdir/kernel/kernel.elf
-	
+
+start_qemu_and_clean: start_qemu clean	

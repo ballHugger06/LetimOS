@@ -12,8 +12,25 @@ extern char environment[4096];
 #endif
 
 
-#ifndef _TERMINALWRITE_
-#define _TERMINALWRITE_
+#ifndef _TERMINALWRITE_H_
+#define _TERMINALWRITE_H_
+
+typedef struct {
+	u8 alpha;
+	u8 red;
+	u8 green;
+	u8 blue;
+} argbstruct;
+
+//x is x coordinate, y is y and z is scanline
+//x and y both start from 1
+#define pixelOffset(x, y, z) ( ( ( y ) - 1 ) * z ) + ( x * 4 )
+
+#define rgb(r, g, b) (u32)(b + (g * 256) + (b * 256 * 256))
+
+//x is the x coordinate for the certical line to be printed
+//c is color code is hex
+#define PRINTERROR(x, c) for (u32 i = 1; i <= bootboot.fb_height; i++) {*(u32*)(&fb + pixelOffset(x, i, bootboot.fb_scanline)) = c;}
 
 typedef struct {
 	u8* fb;
@@ -59,10 +76,12 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->cursor_column = 1;
 	stuff->cursor_row = 1;
 	
+	//Passed prior parts
+
 	if (!psf2FillGlyphListA(file, size, &(stuff->glyph_list))) {
 		while (1) {
-			for (u32 i = 0; i < bootboot.fb_height; i++) {
-			    *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 700 * 4 )) = 0x00FFFFFF;
+			for (u32 i = 1; i <= bootboot.fb_height; i++) {
+			    *(u32*)(&fb + pixelOffset(700, i, bootboot.fb_scanline)) = 0x00FFFFFF;
 			}
 		}
 		return 0;

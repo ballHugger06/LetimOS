@@ -80,7 +80,7 @@ u8* psf2GetGlyphASafe(psf2Header* file_start, u64 file_size, char c) {
 
 		switch (swap) {
 		case 0xfe:
-			for (u16 j = 0; ; j++) {
+			for (u32 j = 0; ; j++) {
 				if (table[i + j] == 0xff) {
 					i += j + 1;
 					break;
@@ -102,7 +102,7 @@ u8* psf2GetGlyphASafe(psf2Header* file_start, u64 file_size, char c) {
 
 //fills out a glyphListA. returns 1 for succes, 0 for fail
 s32 psf2FillGlyphListA(psf2Header* file_start, u64 file_size, glyphListA* list) {
-	for (u8 i = 0; i != 129; i++) {
+	for (u8 i = 0; i < 128; i++) {
 		(*list)[i] = psf2GetGlyphASafe(file_start, file_size, i);
 		if ((*list)[i] == 0) {
 			return 0;

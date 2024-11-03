@@ -11,19 +11,15 @@ extern char environment[4096];
 
 void _start(void) {
     terminalStuff stuff;
-    if (terminalInitForKernel(&stuff) == 0) {
+    if (!terminalInitForKernel(&stuff)) {
         while (1) {
-            for (u32 i = 0; i < bootboot.fb_height; i++) {
-                *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 200 * 4 )) = 0x00FF0000;
-            }
+            PRINTERROR(300, rgb(100,100,200));
         }
     }
 
-    for (u32 i = 0; i < bootboot.fb_width; i++) {
-        *(u32*)(&fb + ( ( ( 100 ) - 1 ) * bootboot.fb_scanline ) + ( i * 4 )) = 0x00FF0000;
-    }
+    PRINTERROR(200, rgb(150,225,200));
 
     while (1) {
-        terminalPutS(&stuff,"Salam Dunya");
+        terminalPutS(&stuff, "Salam Dunya");
     }
 }
