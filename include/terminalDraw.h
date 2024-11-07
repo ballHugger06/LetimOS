@@ -3,6 +3,8 @@
 #include <PSF.h>
 #include <memoryFunctions.h>
 #include <ustar.h>
+#include <erenmath.h>
+#include <useful.h>
 
 #ifndef _BOOTBOOT_
 #define _BOOTBOOT_
@@ -22,16 +24,6 @@ typedef struct {
 	u8 blue;
 } argbstruct;
 
-//x is x coordinate, y is y and z is scanline
-//x and y both start from 1
-#define pixelOffset(x, y, z) ( ( ( y ) - 1 ) * z ) + ( x * 4 )
-
-#define rgb(r, g, b) (u32)(b + (g * 256) + (b * 256 * 256))
-
-//x is the x coordinate for the certical line to be printed
-//c is color code is hex
-#define PRINTERROR(x, c) for (u32 i = 1; i <= bootboot.fb_height; i++) {*(u32*)(&fb + pixelOffset(x, i, bootboot.fb_scanline)) = c;}
-
 typedef struct {
 	u8* fb;
 	glyphListA glyph_list;
@@ -40,6 +32,7 @@ typedef struct {
 	u32 width;
 	u32 glyph_height;
 	u32 glyph_width;
+	u32 glyph_size;
 	u16 row;
 	u16 column;
 	u16 cursor_row;
@@ -54,113 +47,88 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->width = bootboot.fb_width;
 	stuff->scanline = bootboot.fb_scanline;
 
-	ptr file = ustarFindFileByPathBBSafe("fonts/font.psf");
+	u8* file = (u8*)ustarFindFileByPathBBSafe("fonts/font.psf");
 	if (file == 0) {
-		while (1) {
-			for (u32 i = 0; i < bootboot.fb_height; i++) {
-			    *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 200 * 4 )) = 0x0000FF00;
-			}
-		}
 		return 0;
 	}
 
 	u64 size = ustarGetFileSize(((ustarHeader*)file));
 
-	file = ustarGetFileStart(file);
+	file = ustarGetFileStart((ustarHeader*)file);
 
 	stuff->glyph_height = ((psf2Header*)file)->height;
 	stuff->glyph_width = ((psf2Header*)file)->width;
+	stuff->glyph_size = ((psf2Header*)file)->glyph_size;
 
 	stuff->row = (stuff->height / (stuff->glyph_height + 1));
 	stuff->column = (stuff->width / (stuff->glyph_width + 1));
 	stuff->cursor_column = 1;
 	stuff->cursor_row = 1;
-	
-	//Passed prior parts
 
-	if (!psf2FillGlyphListA(file, size, &(stuff->glyph_list))) {
-		while (1) {
-			for (u32 i = 1; i <= bootboot.fb_height; i++) {
-			    *(u32*)(&fb + pixelOffset(700, i, bootboot.fb_scanline)) = 0x00FFFFFF;
-			}
-		}
+	if (!psf2FillGlyphListA((psf2Header*)file, size, &(stuff->glyph_list))) {
 		return 0;
 	}
-
-	for (u32 i = 0; i < bootboot.fb_height; i++) {
-	    *(u32*)(&fb + ( ( ( i ) - 1 ) * bootboot.fb_scanline ) + ( 200 * 4 )) = 0x00FF00FF;
-	}
-
 	return 1;
 }
 
 //scrolls the terminal once
-//doesnt zero out the bottom of the rows
+//doesnt zero out the bottom of the screen
 s32 terminalScroll(terminalStuff* stuff) {
 	u8 swap[stuff->width * 4];
-	u8 swap1[stuff->width * 4];
+	u8 swap2[stuff->width * 4];
+	u32 i = stuff->row * stuff->glyph_height;
 
-	memcpy_big(swap, ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-	memcpy_big(( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row - 1) - 1 ) ) - 1 ) * stuff->scanline ) ), ( stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( (stuff->row) - 1 ) ) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
+	memcpy_big(swap, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->glyph_width * 4);
+	memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
+	i--;
 
-	u32 i = ((stuff->row) * (stuff->glyph_height + 1) - 2);
 	if (i % 2 == 0) {
-		do {
+		for (; i > 1; i--) {
 			if (i % 2 == 0) {
-				memcpy_big(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
+				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
+				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
 			}
 			else {
-				memcpy_big(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
+				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
+				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
 			}
-
-			i--;
-		} while (i != 0);
+		}
 	}
 	else {
-		do {
-			if (i % 2 == 0) {
-				memcpy_big(swap, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap1, (4 * stuff->width));
+		for (; i > 1; i--) {
+			if (i % 2 == 1) {
+				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
+				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
 			}
 			else {
-				memcpy_big(swap1, ( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), (4 * stuff->width));
-				memcpy_big(( stuff->fb + ( ( (i) - 1 ) * stuff->scanline ) ), swap, (4 * stuff->width));
+				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
+				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
 			}
-
-			i--;
-		} while (i != 0);
+		}
 	}
 
 	return 1;
 }
 
 //puts c at the cursor position and increments the position
-s32 terminalPutC(terminalStuff* stuff, char c) {
-	u32 i;
-	u32 j = 0;
-	u8 k;
-	u8* pixel = stuff->fb + ( ( ( ( stuff->glyph_height + 1 ) * ( stuff->cursor_row - 1 ) ) - 1 ) * stuff->scanline ) + ( ( stuff->cursor_column - 1 ) * ( stuff->glyph_width + 1) * 4 );
+s32 terminalPutC(terminalStuff* stuff, char c, u32 color) {
+	u8* pixel = stuff->fb + pixelOffset0((stuff->glyph_width * (stuff->cursor_column - 1)), ((stuff->glyph_height * (stuff->cursor_row - 1))), stuff->scanline);
 
-	for (i = 0; i < stuff->glyph_height; i++) {
-		for (k = 0; ; k++) {
-			if ((j * 8) + k == stuff->glyph_width) {
+	//i is glyph index, k is width index in bytes, j is glyph bit and pixel index
+	for (u32 k = 0, i = 0; i < stuff->glyph_size; i++) {
+		k = (i % (((stuff->glyph_width - 1) / 8) + 1));
+
+		for (u8 j = 0; j < 8; j++) {
+			if (((k * 8) + (j + 1)) == stuff->glyph_width) {
+				pixel += stuff->scanline;
 				break;
 			}
-			
-			if ((*(stuff->glyph_list[c] + j) << k) >= 0b10000000) {
-				*(u32*)(pixel + (j * 8) + k) = 0x00FFFFFF;
-			}
-			
-			if (k == 7) {
-				k = 0;
-				j += 1;
-				continue;
+
+			if ((u8)(((u8)(((stuff->glyph_list)[c])[i])) << j) >= ((u8)0b10000000)) {
+				*(u32*)(pixel + (32 * k) + (4 * j)) = color;
 			}
 		}
-
-		pixel += stuff->scanline;
+		
 	}
 	
 	stuff->cursor_column += 1;
@@ -176,10 +144,11 @@ s32 terminalPutC(terminalStuff* stuff, char c) {
 	return 1;
 }
 
-s32 terminalPutS(terminalStuff* stuff, char* s) {
+s32 terminalPutS(terminalStuff* stuff, char* s, u32 color) {
 	u64 i = 0;
 	while (s[i] != 0) {
-		terminalPutC(stuff, s[i]);
+		terminalPutC(stuff, s[i], color);
+		i++;
 	}
 	return 1;
 }

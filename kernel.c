@@ -1,6 +1,7 @@
 #include <typedefs.h>
 #include <bootboot.h>
 #include <terminalDraw.h>
+#include <useful.h>
 
 #ifndef _BOOTBOOT_
 #define _BOOTBOOT_
@@ -10,16 +11,13 @@ extern char environment[4096];
 #endif
 
 void _start(void) {
-    terminalStuff stuff;
-    if (!terminalInitForKernel(&stuff)) {
+    terminalStuff stuffe;
+	terminalStuff* stuff = &stuffe;
+    if (!terminalInitForKernel(stuff)) {
         while (1) {
-            PRINTERROR(300, rgb(100,100,200));
+            PRINTERROR(300, rgb(255,255,25));
         }
     }
 
-    PRINTERROR(200, rgb(150,225,200));
-
-    while (1) {
-        terminalPutS(&stuff, "Salam Dunya");
-    }
+    terminalPutS(stuff, "Salam Dunya", rgb(0,255,255));
 }

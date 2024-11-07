@@ -40,7 +40,7 @@ u8* ustarGetFileStart(ustarHeader* start) {
 
 ustarHeader* ustarGetNextHeaderBBSafe(ustarHeader* start) {
 	u64 size = ustarGetFileSize(start);
-	ustarHeader* ptr = (ustarHeader*)((u8*)start + ((((size + 511) / 512) + 1) * 512));
+	ustarHeader* ptr = (ustarHeader*)(((u8*)start) + ((((size + 511) / 512) + 1) * 512));
 	if ((u64)ptr >= bootboot.initrd_ptr + bootboot.initrd_size) {
 		return 0;
 	}

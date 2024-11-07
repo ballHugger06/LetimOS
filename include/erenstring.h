@@ -1,7 +1,7 @@
 #include <typedefs.h>
 
-#ifndef _STRING_
-#define _STRING_
+#ifndef _ERENSTRING_H_
+#define _ERENSTRING_H_
 s32 strsame(char* first, char* second) {
     if (first[0] != second[0]) {
         return 0;

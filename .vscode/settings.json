@@ -1,3 +1,7 @@
 {
-    "makefile.configureOnOpen": false
+	"makefile.configureOnOpen": false,
+	"editor.insertSpaces": false,
+	"editor.fontSize": 10,
+	"editor.cursorWidth": 1,
+	"editor.cursorSmoothCaretAnimation": "on"
 }

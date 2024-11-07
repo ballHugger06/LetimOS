@@ -3,7 +3,7 @@
 #ifndef _MEMFUNCTIONS_
 #define _MEMFUNCTIONS_
 
-void memcpy_big(u8* source, u8* destination, u32 size) {
+void memcpy_big(u8* destination, u8* source, u32 size) {
     u32 j;
                           //8 is the size of a u64
     for (j = 0; j < (size / 8); j++) {

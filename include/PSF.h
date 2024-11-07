@@ -1,13 +1,14 @@
 #include <typedefs.h>
 #include <tar.h>
 #include <bootboot.h>
+#include <useful.h>
 
 #ifndef _PSF_H_
 #define _PSF_H_
 
-#define PSF1_MAGIC 0x3604
+#define PSF1_MAGIC 0x0436
 
-#define PSF2_MAGIC 0X72B54A86
+#define PSF2_MAGIC 0X864AB572
 
 #define PSF1_MODE512 0x01
 #define PSF1_MODEHASTAB 0X02
@@ -68,19 +69,22 @@ u8* psf2GetUniTable(psf2Header* file_start) {
 //returns the corresponding glyphs first byte. If file_size boundary is crossed, returns 0 
 u8* psf2GetGlyphASafe(psf2Header* file_start, u64 file_size, char c) {
 	u8* table = psf2GetUniTable(file_start);
-	char swap;
+	u8 swap;
 	u32 i = 0;
 	u32 glyph_counter = 0;
 	do {
-		if (table + i >= file_start + file_size) {
+		if (((u64)table + i) >= ((u64)file_start + (u64)file_size)) {
 			return 0;
 		}
 
 		swap = table[i];
-
 		switch (swap) {
 		case 0xfe:
-			for (u32 j = 0; ; j++) {
+			for (u32 j = 1; ; j++) {
+				if (((u64)table + i + j) >= ((u64)file_start + (u64)file_size)) {
+					return 0;
+				}
+
 				if (table[i + j] == 0xff) {
 					i += j + 1;
 					break;
@@ -95,17 +99,20 @@ u8* psf2GetGlyphASafe(psf2Header* file_start, u64 file_size, char c) {
 			continue;
 		}
 
+		i++;
+
 	} while (swap != c);
 
 	return (((u8*)file_start) + file_start->headersize + (file_start->glyph_size * glyph_counter));
 }
 
 //fills out a glyphListA. returns 1 for succes, 0 for fail
-s32 psf2FillGlyphListA(psf2Header* file_start, u64 file_size, glyphListA* list) {
+s32 psf2FillGlyphListA(psf2Header *file_start, u64 file_size, glyphListA *list) {
 	for (u8 i = 0; i < 128; i++) {
 		(*list)[i] = psf2GetGlyphASafe(file_start, file_size, i);
+
 		if ((*list)[i] == 0) {
-			return 0;
+			//return 0;
 		}
 	}
 	return 1;
