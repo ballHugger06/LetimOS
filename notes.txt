@@ -1,0 +1,10 @@
+TO DO
+	-Fix TerminalScroll
+		-the stack doesnt have enough space for the swap arrays
+		-WAITING FOR MEMORY MANAGER
+
+	-Create a memory manager
+		-Decide on where to put the heap
+		-Learn linker script
+
+	-Add a nulled glyph so the non-printable characters can point to it in a GlyphList

@@ -60,8 +60,8 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	stuff->glyph_width = ((psf2Header*)file)->width;
 	stuff->glyph_size = ((psf2Header*)file)->glyph_size;
 
-	stuff->row = (stuff->height / (stuff->glyph_height + 1));
-	stuff->column = (stuff->width / (stuff->glyph_width + 1));
+	stuff->row = (stuff->height / (stuff->glyph_height));
+	stuff->column = (stuff->width / (stuff->glyph_width));
 	stuff->cursor_column = 1;
 	stuff->cursor_row = 1;
 
@@ -71,38 +71,71 @@ s32 terminalInitForKernel(terminalStuff* stuff) {
 	return 1;
 }
 
-//scrolls the terminal once
-//doesnt zero out the bottom of the screen
+
+
+
+//scrolls the terminal by one row
 s32 terminalScroll(terminalStuff* stuff) {
-	u8 swap[stuff->width * 4];
-	u8 swap2[stuff->width * 4];
-	u32 i = stuff->row * stuff->glyph_height;
+	u32 i;
+	u64 width_u8 = stuff->width * 4;
 
-	memcpy_big(swap, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->glyph_width * 4);
-	memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
-	i--;
+	//UNCOMMENT THE LINES BELOW RGB(255,0,0)
+	// u8 swap[stuff->glyph_height][width_u8];
+	// u8 swap2[stuff->glyph_height][width_u8];
 
-	if (i % 2 == 0) {
-		for (; i > 1; i--) {
-			if (i % 2 == 0) {
-				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
-				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
+	//THE LINES BELOW ARE FAULTY AND SHOULD NOT BE TRUSTED RGB(255,0,0)
+	u8* swap[stuff->glyph_height];
+	u8* swap2[stuff->glyph_height];
+
+	for (u32 l = 0; l < stuff->glyph_height; l++) {
+		swap[l] = stuff->fb + (l * stuff->scanline);
+		swap2[l] = stuff->fb + (stuff->scanline * stuff->glyph_height) + (l * stuff->scanline);
+	}
+	//THE LINES ABOVE ARE FAULTY AND SHOULD NOT BE TRUSTED RGB(255,0,0)
+
+	u8* pixelrow = stuff->fb + pixelOffset0(0, (stuff->row * stuff->glyph_height) - 1, stuff->scanline);
+
+	//initalizing the swap algorithm
+	pixelrow -= stuff->scanline * stuff->glyph_height;
+	for (i = 0; i < stuff->glyph_height; i++) {
+		memcpy_big(swap[i], pixelrow, width_u8);
+		pixelrow -= stuff->scanline;
+	}
+	pixelrow += stuff->scanline * (stuff->glyph_height * 2);
+	
+	for (i = 0; i < stuff->glyph_height; i++) {
+		memcpy_big(pixelrow - (stuff->glyph_height * stuff->scanline), pixelrow, width_u8);
+		pixelrow -= stuff->scanline;
+	}
+	pixelrow -= stuff->scanline * stuff->glyph_height;
+
+	//now the main algorithm
+	//4 SHOULD BE 2!!!!! rgb(255,0,0)
+	for (i = 0; i < (stuff->row - 4); i++) {
+		u32 j;
+		
+		if (i % 2) {
+			for (j = 0; j < stuff->glyph_height; j++) {
+				memcpy_big(swap2[j], pixelrow, width_u8);
+				pixelrow-= stuff->scanline;
 			}
-			else {
-				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
-				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
+			pixelrow += stuff->scanline * (stuff->glyph_height);
+
+			for (j = 0; j < stuff->glyph_height; j++) {
+				memcpy_big(pixelrow, swap[j], width_u8);
+				pixelrow -= stuff->scanline;
 			}
 		}
-	}
-	else {
-		for (; i > 1; i--) {
-			if (i % 2 == 1) {
-				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
-				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
+		else {
+			for (j = 0; j < stuff->glyph_height; j++) {
+				memcpy_big(swap[j], pixelrow, width_u8);
+				pixelrow-= stuff->scanline;
 			}
-			else {
-				memcpy_big(swap2, stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->width * 4);
-				memcpy_big(stuff->fb + pixelOffset(1, i - 1, stuff->scanline), stuff->fb + pixelOffset(1, i, stuff->scanline), stuff->width * 4);
+			pixelrow += stuff->scanline * (stuff->glyph_height);
+			
+			for (j = 0; j < stuff->glyph_height; j++) {
+				memcpy_big(pixelrow, swap2[j], width_u8);
+				pixelrow -= stuff->scanline;
 			}
 		}
 	}
@@ -110,8 +143,10 @@ s32 terminalScroll(terminalStuff* stuff) {
 	return 1;
 }
 
+
+
 //puts c at the cursor position and increments the position
-s32 terminalPutC(terminalStuff* stuff, char c, u32 color) {
+s32 terminalPutC(terminalStuff* stuff, char c, u32 color, u32 background_color) {
 	u8* pixel = stuff->fb + pixelOffset0((stuff->glyph_width * (stuff->cursor_column - 1)), ((stuff->glyph_height * (stuff->cursor_row - 1))), stuff->scanline);
 
 	//i is glyph index, k is width index in bytes, j is glyph bit and pixel index
@@ -127,6 +162,9 @@ s32 terminalPutC(terminalStuff* stuff, char c, u32 color) {
 			if ((u8)(((u8)(((stuff->glyph_list)[c])[i])) << j) >= ((u8)0b10000000)) {
 				*(u32*)(pixel + (32 * k) + (4 * j)) = color;
 			}
+			else {
+				*(u32*)(pixel + (32 * k) + (4 * j)) = background_color;
+			}
 		}
 		
 	}
@@ -134,7 +172,7 @@ s32 terminalPutC(terminalStuff* stuff, char c, u32 color) {
 	stuff->cursor_column += 1;
 	if (stuff->cursor_column > stuff->column) {
 		stuff->cursor_column = 1;
-		stuff->cursor_row +=1;
+		stuff->cursor_row += 1;
 
 		if (stuff->cursor_row > stuff->row) {
 			terminalScroll(stuff);
@@ -144,10 +182,10 @@ s32 terminalPutC(terminalStuff* stuff, char c, u32 color) {
 	return 1;
 }
 
-s32 terminalPutS(terminalStuff* stuff, char* s, u32 color) {
+s32 terminalPutS(terminalStuff* stuff, char* s, u32 color, u32 background_color) {
 	u64 i = 0;
 	while (s[i] != 0) {
-		terminalPutC(stuff, s[i], color);
+		terminalPutC(stuff, s[i], color, background_color);
 		i++;
 	}
 	return 1;

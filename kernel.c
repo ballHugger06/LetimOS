@@ -15,9 +15,12 @@ void _start(void) {
 	terminalStuff* stuff = &stuffe;
     if (!terminalInitForKernel(stuff)) {
         while (1) {
-            PRINTERROR(300, rgb(255,255,25));
+            terminalPutS(stuff, "error", rgb(255,255,255), rgb(0,0,0));
         }
     }
 
-    terminalPutS(stuff, "Salam Dunya", rgb(0,255,255));
+    while(1) {
+		for (u32 i = 0; i < 0x00FFFFFF; i++);
+		terminalPutS(stuff, " Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", rgb(0,255,255), rgb(100,100,0));
+	}
 }
