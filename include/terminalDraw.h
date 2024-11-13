@@ -154,16 +154,16 @@ s32 terminalPutC(terminalStuff* stuff, char c, u32 color, u32 background_color) 
 		k = (i % (((stuff->glyph_width - 1) / 8) + 1));
 
 		for (u8 j = 0; j < 8; j++) {
-			if (((k * 8) + (j + 1)) == stuff->glyph_width) {
-				pixel += stuff->scanline;
-				break;
-			}
-
 			if ((u8)(((u8)(((stuff->glyph_list)[c])[i])) << j) >= ((u8)0b10000000)) {
 				*(u32*)(pixel + (32 * k) + (4 * j)) = color;
 			}
 			else {
 				*(u32*)(pixel + (32 * k) + (4 * j)) = background_color;
+			}
+
+			if (((k * 8) + (j + 1)) == stuff->glyph_width) {
+				pixel += stuff->scanline;
+				break;
 			}
 		}
 		
