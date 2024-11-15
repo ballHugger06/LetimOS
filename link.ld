@@ -34,8 +34,8 @@ mmio        = 0xfffffffff8000000;              /* these are configurable for lev
 fb          = 0xfffffffffc000000;
 bootboot    = 0xffffffffffe00000;
 environment = 0xffffffffffe01000;
-kernelheap_start = 0xffffffff00000000;
-kernelheap_size =  0x00000000f8000000;
+kernelheap_start = 0x000000000000000f;
+kernelheap_size =  0x0000000fffffffff;
 /* initstack = 1024; */
 PHDRS
 {

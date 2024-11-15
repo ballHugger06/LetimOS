@@ -2,6 +2,7 @@
 #include <bootboot.h>
 #include <PSF.h>
 #include <memoryFunctions.h>
+#include <memoryManager.h>
 #include <ustar.h>
 #include <erenmath.h>
 #include <useful.h>
@@ -79,19 +80,17 @@ s32 terminalScroll(terminalStuff* stuff) {
 	u32 i;
 	u64 width_u8 = stuff->width * 4;
 
-	//UNCOMMENT THE LINES BELOW RGB(255,0,0)
-	// u8 swap[stuff->glyph_height][width_u8];
-	// u8 swap2[stuff->glyph_height][width_u8];
-
-	//THE LINES BELOW ARE FAULTY AND SHOULD NOT BE TRUSTED RGB(255,0,0)
 	u8* swap[stuff->glyph_height];
 	u8* swap2[stuff->glyph_height];
 
-	for (u32 l = 0; l < stuff->glyph_height; l++) {
-		swap[l] = stuff->fb + (l * stuff->scanline);
-		swap2[l] = stuff->fb + (stuff->scanline * stuff->glyph_height) + (l * stuff->scanline);
+	for (u16 counter = 0; counter < stuff->glyph_height; counter++) {
+		swap[counter] = kmalloc(stuff->width * 4);
+		swap2[counter] = kmalloc(stuff->width * 4);
+		if ( (swap[counter] == 0)) {
+			PRINTERROR(counter + 1, rgb(0,255,0));
+		}
 	}
-	//THE LINES ABOVE ARE FAULTY AND SHOULD NOT BE TRUSTED RGB(255,0,0)
+
 
 	u8* pixelrow = stuff->fb + pixelOffset0(0, (stuff->row * stuff->glyph_height) - 1, stuff->scanline);
 
@@ -110,34 +109,38 @@ s32 terminalScroll(terminalStuff* stuff) {
 	pixelrow -= stuff->scanline * stuff->glyph_height;
 
 	//now the main algorithm
-	//4 SHOULD BE 2!!!!! rgb(255,0,0)
-	for (i = 0; i < (stuff->row - 4); i++) {
+	for (i = 0; i < (stuff->row - 2); i++) {
 		u32 j;
 		
 		if (i % 2) {
-			for (j = 0; j < stuff->glyph_height; j++) {
-				memcpy_big(swap2[j], pixelrow, width_u8);
-				pixelrow-= stuff->scanline;
-			}
-			pixelrow += stuff->scanline * (stuff->glyph_height);
-
-			for (j = 0; j < stuff->glyph_height; j++) {
-				memcpy_big(pixelrow, swap[j], width_u8);
-				pixelrow -= stuff->scanline;
-			}
-		}
-		else {
 			for (j = 0; j < stuff->glyph_height; j++) {
 				memcpy_big(swap[j], pixelrow, width_u8);
 				pixelrow-= stuff->scanline;
 			}
 			pixelrow += stuff->scanline * (stuff->glyph_height);
-			
+
 			for (j = 0; j < stuff->glyph_height; j++) {
 				memcpy_big(pixelrow, swap2[j], width_u8);
 				pixelrow -= stuff->scanline;
 			}
 		}
+		else {
+			for (j = 0; j < stuff->glyph_height; j++) {
+				memcpy_big(swap2[j], pixelrow, width_u8);
+				pixelrow-= stuff->scanline;
+			}
+			pixelrow += stuff->scanline * (stuff->glyph_height);
+			
+			for (j = 0; j < stuff->glyph_height; j++) {
+				memcpy_big(pixelrow, swap[j], width_u8);
+				pixelrow -= stuff->scanline;
+			}
+		}
+	}
+
+	for (u16 counter = 0; counter < stuff->glyph_height; counter++) {
+		kfree(swap[counter]);
+		kfree(swap2[counter]);
 	}
 
 	return 1;

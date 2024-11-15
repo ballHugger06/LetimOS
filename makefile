@@ -18,7 +18,7 @@ ledisk.img: initdir/kernel/kernel.elf
 	./mkbootimg jason.json ledisk.img
 
 start_qemu: ledisk.img
-	qemu-system-x86_64 -cpu core2duo -bios OVMF.fd -drive file=ledisk.img,if=ide,format=raw
+	qemu-system-x86_64 -m 256 -cpu core2duo -bios OVMF.fd -drive file=ledisk.img,if=ide,format=raw
 
 clean: initdir/kernel/kernel.elf kernel.elf ledisk.img
 	rm ledisk.img

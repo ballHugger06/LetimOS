@@ -11,6 +11,7 @@ extern char environment[4096];
 #endif
 
 void _start(void) {
+	mmKernelHeapInit();
     terminalStuff stuffe;
 	terminalStuff* stuff = &stuffe;
     if (!terminalInitForKernel(stuff)) {
@@ -20,7 +21,7 @@ void _start(void) {
     }
 
     while(1) {
-		for (u32 i = 0; i < 0x00FFFFFF; i++);
+		delay();
 		terminalPutS(stuff, " Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", rgb(0,255,255), rgb(100,100,0));
 	}
 }

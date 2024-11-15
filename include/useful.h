@@ -9,9 +9,21 @@
 
 #ifndef _USEFUL_H_
 #define _USEFUL_H_
-//x is the x coordinate for the certical line to be printed
+
+//x is the x coordinate for the certical line to be printed, starts from 1
 //c is color code is hex
 void PRINTERROR(u32 x, u32 c) {
 	for (u32 seggs = 1; seggs <= bootboot.fb_height; seggs++) {*(u32*)(&fb + pixelOffset(x, seggs, bootboot.fb_scanline)) = c;}
+}
+
+void PRINTERROR4EVER(u32 x, u32 c) {
+	while (1) {
+		PRINTERROR(x, c);
+	}
+}
+
+void delay() {
+	for (u32 i = 0; i < 0x00FFFFFF; i++) {
+	}
 }
 #endif

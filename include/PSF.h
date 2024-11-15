@@ -1,4 +1,5 @@
 #include <typedefs.h>
+#include <memoryManager.h>
 #include <tar.h>
 #include <bootboot.h>
 #include <useful.h>
@@ -36,6 +37,7 @@ typedef struct {
     u8 mode;
     u8 glyph_size;
 } __attribute__((packed)) psf1Header;
+
 
 //returns 1 for psf1, 2 for psf2 and 0 if the file isnt a psf file
 s32 psfDetectVersion(ptr file_start) {
@@ -108,11 +110,21 @@ u8* psf2GetGlyphASafe(psf2Header* file_start, u64 file_size, char c) {
 
 //fills out a glyphListA. returns 1 for succes, 0 for fail
 s32 psf2FillGlyphListA(psf2Header *file_start, u64 file_size, glyphListA *list) {
+	char first = 1;
+	ptr nullglyph;
 	for (u8 i = 0; i < 128; i++) {
 		(*list)[i] = psf2GetGlyphASafe(file_start, file_size, i);
 
 		if ((*list)[i] == 0) {
-			//return 0;
+			if (first) {
+				nullglyph = kmalloc(file_start->glyph_size);
+				for (u32 k = 0; k < file_start->glyph_size; k++) {
+					((u8*)nullglyph)[k] = 0x00;
+				}
+				first = 0;
+			}
+
+			(*list)[i] = nullglyph;
 		}
 	}
 	return 1;

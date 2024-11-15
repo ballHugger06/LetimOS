@@ -1,10 +1,19 @@
 TO DO
-	-Fix TerminalScroll
-		-the stack doesnt have enough space for the swap arrays
-		-WAITING FOR MEMORY MANAGER
+	NOW
+		-KEYBOARD INPUT
+			-enable interrupts and fill the idt
+	LATER
+		-memory manager LATE-TASK
+			-There is a heap but it is in positive memory space, so map some memory on negative space for the kernel heap
+			-Decide on where to put the heap
 
-	-Create a memory manager
-		-Decide on where to put the heap
-		-Learn linker script
+	END-GAME
 
-	-Add a nulled glyph so the non-printable characters can point to it in a GlyphList
+
+LOG
+	-Made a heap for the kernel but it is in the positive address space since the positive address space gets mapped by bootboot
+	and I dont know how to map memory yet
+
+	-Fixed TerminallScroll
+
+	-psfFillGlyphListA now allocates memory for a nulled glyph for the non printable characters
