@@ -17,3 +17,4 @@ LOG
 	-Fixed TerminallScroll
 
 	-psfFillGlyphListA now allocates memory for a nulled glyph for the non printable characters
+
