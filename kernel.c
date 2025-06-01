@@ -12,16 +12,16 @@ extern char environment[4096];
 
 void _start(void) {
 	mmKernelHeapInit();
-    terminalStuff stuffe;
+	terminalStuff stuffe;
 	terminalStuff* stuff = &stuffe;
-    if (!terminalInitForKernel(stuff)) {
-        while (1) {
-            terminalPutS(stuff, "error", rgb(255,255,255), rgb(0,0,0));
-        }
-    }
+	if (!terminalInitForKernel(stuff)) {
+		while (1) {
+			terminalPutS(stuff, "error", rgb(255,255,255), rgb(0,0,0));
+		}
+	}
 
-    while(1) {
+	while(1) {
 		delay();
-		terminalPutS(stuff, " Lorem ipsum dolor sit amet, consectetur adipiscing elit. ", rgb(0,255,255), rgb(100,100,0));
+		terminalPutS(stuff, " sex ", rgb(0,255,255), rgb(100,100,0));
 	}
 }

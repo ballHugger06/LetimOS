@@ -5,7 +5,7 @@
 
 extern u8 kernelheap_start;
 
-//!! this is not the size of the heap! You cant actually pass in variables from the linker script. The size will be the addres of kernelheap_size
+//!! this is not the size of the heap! You cant actually pass in variables from the linker script! The size will be the addres of kernelheap_size
 extern u8 kernelheap_size;
 
 #define KERNEL_HEAP_SIZE ((u64)(&kernelheap_size))
