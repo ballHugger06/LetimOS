@@ -1,5 +1,19 @@
 all: kernel.elf initdir/kernel/kernel.elf ledisk.img start_qemu clean
 
+debug:
+	x86_64-elf-gcc -Wall -fpic -ffreestanding -fno-stack-protector -nostdinc -nostdlib -Iinclude -mno-red-zone -g -c kernel.c -o kernel.o
+	x86_64-elf-ld -nostdlib -n -T link.ld kernel.o -o kernel.elf
+	cp kernel.elf initdir/kernel
+	./mkbootimg jason.json ledisk.img
+	qemu-system-x86_64 -m 1024 -s -S -cpu core2duo -bios OVMF.fd -drive file=ledisk.img,if=ide,format=raw
+	rm ledisk.img
+	rm kernel.elf
+	rm kernel.o
+	rm initdir/kernel/kernel.elf
+
+gdb:
+	gdb --command=gdbcommands
+
 first_time:
 	mkdir initdir
 	mkdir initdir/kernel
@@ -25,5 +39,3 @@ clean: initdir/kernel/kernel.elf kernel.elf ledisk.img
 	rm kernel.elf
 	rm kernel.o
 	rm initdir/kernel/kernel.elf
-
-start_qemu_and_clean: start_qemu clean	

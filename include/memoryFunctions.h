@@ -15,4 +15,10 @@ void memcpy_big(u8* destination, u8* source, u64 size) {
     }
 }
 
+void memzero(u8* destination, u64 size) {
+	for (u64 i = 0; i < size; i++) {
+		destination[i] = 0;
+	}
+}
+
 #endif
