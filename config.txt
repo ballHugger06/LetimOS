@@ -1,2 +1,2 @@
-screen=640x480
+screen=320x200
 kernel=kernel/kernel.elf

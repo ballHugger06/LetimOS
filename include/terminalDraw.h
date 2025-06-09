@@ -185,7 +185,7 @@ s32 terminalScroll(terminalStuff* stuff) {
 s32 terminalPutC(terminalStuff* stuff, char c, char changebackground, u32 color, u32 background_color) {
 	u8* pixel = stuff->fb + pixelOffset0((stuff->glyph_width * (stuff->cursor_column - 1)), ((stuff->glyph_height * (stuff->cursor_row - 1))), stuff->scanline);
 
-	if ((c != "\n") && (c != "\0")) {
+	if ((c != '\n') && (c != '\0')) {
 		//i is glyph index, k is width index in bytes, j is glyph bit/pixel index
 		for (u32 k = 0, i = 0; i < stuff->glyph_size; i++) {
 			k = (i % (((stuff->glyph_width - 1) / 8) + 1));

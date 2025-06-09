@@ -12,6 +12,7 @@ u64 power(u64 base, u64 power) {
 	for (u64 i = 0; i != power; i++) {
 		result *= base;
 	}
+	return result;
 }
 
 #endif
